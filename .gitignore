@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+# names + attendance (personal data) and reader assignments
+data/
+node_modules/
+*.log
+*.zip

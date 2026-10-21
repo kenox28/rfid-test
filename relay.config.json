@@ -1,0 +1,41 @@
+{
+  "preset": "lan-relay-ascii",
+  "host": "192.168.20.129",
+  "port": 6722,
+  "pulseMs": 1000,
+
+  "presets": {
+    "lan-relay-ascii": {
+      "label": "Generic 2-ch LAN relay (ASCII over TCP)",
+      "transport": "tcp",
+      "encoding": "ascii",
+      "commands": { "on": "1{ch}", "off": "2{ch}" }
+    },
+    "modbus-tcp": {
+      "label": "Modbus TCP relay (port 502)",
+      "transport": "tcp",
+      "encoding": "hex",
+      "commands": {
+        "on": "00 01 00 00 00 06 01 05 00 0{ch0} FF 00",
+        "off": "00 01 00 00 00 06 01 05 00 0{ch0} 00 00"
+      }
+    },
+    "lc-tech-hex": {
+      "label": "LC Technology style (A0 ch state checksum) over TCP",
+      "transport": "tcp",
+      "encoding": "hex",
+      "commands": { "on": "A0 {chx} 01 {sum}", "off": "A0 {chx} 00 {sum}" }
+    },
+    "lc-tech-hex-udp": {
+      "label": "LC Technology style over UDP",
+      "transport": "udp",
+      "encoding": "hex",
+      "commands": { "on": "A0 {chx} 01 {sum}", "off": "A0 {chx} 00 {sum}" }
+    },
+    "http-cgi": {
+      "label": "HTTP CGI board (edit paths to match your manual)",
+      "transport": "http",
+      "commands": { "on": "/relays.cgi?relayon={ch0}", "off": "/relays.cgi?relayoff={ch0}" }
+    }
+  }
+}

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RFID Attendance</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <h1>RFID Attendance</h1>
+    <nav class="nav" aria-label="Pages">
+      <a href="#register" id="nav-register">1 · Card Registration</a>
+      <a href="#attendance" id="nav-attendance">2 · Time In / Time Out</a>
+    </nav>
+    <span id="server-status" class="pill">connecting…</span>
+  </header>
+
+  <section id="token-panel" class="card hidden">
+    <h2>Access token</h2>
+    <p>Open the full link printed in the server window, or paste the token here.</p>
+    <form id="token-form" class="row">
+      <input id="token-input" type="password" autocomplete="off" placeholder="Access token" required>
+      <button type="submit" class="primary">Unlock</button>
+    </form>
+  </section>
+
+  <!-- Devices: shared by both pages so connections stay open when switching pages -->
+  <details id="devices" class="card devices">
+    <summary><strong>Devices</strong> <span id="devices-summary" class="small"></span></summary>
+    <div class="device-grid">
+      <div class="device">
+        <div class="device-name">Relay · LCUS-X2 (USB)</div>
+        <div class="row">
+          <button id="relay-connect" class="primary small-btn">Connect relay</button>
+          <span id="relay-conn" class="chip warn">not connected</span>
+        </div>
+        <div class="row small">
+          <label>Baud
+            <select id="relay-baud"><option>9600</option><option>115200</option></select>
+          </label>
+          <label>On for <input id="pulse-ms" type="number" min="200" max="10000" step="100" value="1000"> ms</label>
+        </div>
+        <div id="relay-help" class="small"></div>
+      </div>
+
+      <div class="device" id="dev-r1">
+        <div class="device-name">Reader 1 · Time In · Relay 1</div>
+        <select id="r1-source" aria-label="Reader 1 type">
+          <option value="keyboard">USB keyboard type</option>
+          <option value="serial">Serial (COM port)</option>
+        </select>
+        <div class="row">
+          <button id="r1-action" class="primary small-btn">Set Reader 1</button>
+          <span id="r1-conn" class="chip">not set</span>
+        </div>
+      </div>
+
+      <div class="device" id="dev-r2">
+        <div class="device-name">Reader 2 · Time Out · Relay 2</div>
+        <select id="r2-source" aria-label="Reader 2 type">
+          <option value="keyboard">USB keyboard type</option>
+          <option value="serial">Serial (COM port)</option>
+        </select>
+        <div class="row">
+          <button id="r2-action" class="primary small-btn">Set Reader 2</button>
+          <span id="r2-conn" class="chip">not set</span>
+        </div>
+      </div>
+    </div>
+    <p id="helper-status" class="small"></p>
+  </details>
+
+  <!-- ================= PAGE 1: REGISTRATION ================= -->
+  <main id="page-register" class="page hidden">
+    <section class="card">
+      <h2>Register a card</h2>
+      <div class="scan-box">
+        <div class="muted">Tap a card on either reader</div>
+        <div id="reg-uid" class="big mono">—</div>
+        <div id="reg-hint" class="small"></div>
+      </div>
+      <form id="reg-form" class="form">
+        <label>Card number
+          <input id="reg-uid-input" class="mono" maxlength="32" autocomplete="off" required>
+        </label>
+        <label>Name
+          <input id="reg-name" maxlength="80" autocomplete="off" required>
+        </label>
+        <button type="submit" class="primary">Register</button>
+      </form>
+      <p id="reg-msg" class="msg" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <h2>Registered cards <span id="card-count" class="muted small"></span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Card number</th><th>Name</th><th>Registered</th><th></th></tr></thead>
+          <tbody id="card-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= PAGE 2: TIME IN / TIME OUT ================= -->
+  <main id="page-attendance" class="page hidden">
+    <div class="stations">
+      <section class="card station" id="st-1">
+        <div class="station-head">
+          <h2>TIME IN</h2>
+          <span id="st-1-reader" class="chip">Reader 1</span>
+        </div>
+        <div class="station-body">
+          <div class="muted small">Card number</div>
+          <div id="st-1-uid" class="big mono">—</div>
+          <div id="st-1-name" class="name"></div>
+          <div id="st-1-time" class="time mono"></div>
+          <div id="st-1-msg" class="msg"></div>
+        </div>
+        <div class="station-foot">
+          <span id="st-1-relay" class="chip relay"><span class="dot"></span><span class="txt">Relay 1: —</span></span>
+          <button id="test-relay-1" class="small-btn">Test relay 1</button>
+        </div>
+      </section>
+
+      <section class="card station" id="st-2">
+        <div class="station-head">
+          <h2>TIME OUT</h2>
+          <span id="st-2-reader" class="chip">Reader 2</span>
+        </div>
+        <div class="station-body">
+          <div class="muted small">Card number</div>
+          <div id="st-2-uid" class="big mono">—</div>
+          <div id="st-2-name" class="name"></div>
+          <div id="st-2-time" class="time mono"></div>
+          <div id="st-2-msg" class="msg"></div>
+        </div>
+        <div class="station-foot">
+          <span id="st-2-relay" class="chip relay"><span class="dot"></span><span class="txt">Relay 2: —</span></span>
+          <button id="test-relay-2" class="small-btn">Test relay 2</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Today</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Card number</th><th>Name</th><th>Time in</th><th>Time out</th></tr></thead>
+          <tbody id="today-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
